@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.mare",
+      "bundleIdentifier": "com.bunsyk.mare",
       "buildNumber": "1"
     },
     "android": {
@@ -24,7 +24,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#E6F4FE"
       },
-      "package": "com.yourcompany.mare",
+      "package": "com.bunsyk.mare",
       "versionCode": 1,
       "permissions": []
     },
