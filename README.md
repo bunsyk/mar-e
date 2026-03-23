@@ -33,7 +33,35 @@ Instaliraj sljedeće prije početka:
    - **Storage** (po potrebi)
 4. Klikni na zupčanik ⚙️ → **Postavke projekta**
 5. Pod sekcijom **"Vaše aplikacije"** klikni na **Web** ikonu (`</>`)
-6. Kopiraj `firebaseConfig` i popuni `src/config/firebase.js`
+6. Kopiraj vrijednosti iz `firebaseConfig` objekta
+
+### Postavljanje .env fajla (lokalni razvoj)
+
+```bash
+# Kopiraj šablon
+cp .env.example .env
+```
+
+Otvori `.env` i zamijeni placeholder vrijednosti sa stvarnim ključevima iz Firebase Console:
+
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=moj-projekat.firebaseapp.com
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=moj-projekat
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=moj-projekat.firebasestorage.app
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+EXPO_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abc123
+```
+
+> ⚠️ `.env` je u `.gitignore` — **nikad neće biti commitovan**. Dijeli ključeve sa saradnicima putem sigurnog kanala (npr. password manager).
+
+### Postavljanje za EAS Build (Google Play / App Store)
+
+Za cloud buildove (EAS), isti ključevi se postavljaju u Expo dashboardu:
+
+1. Idi na [expo.dev](https://expo.dev) → tvoj projekat
+2. **Settings** → **Environment variables**
+3. Dodaj sve `EXPO_PUBLIC_FIREBASE_*` varijable
 
 ### Android (google-services.json)
 
@@ -146,7 +174,7 @@ mar-e/
 ├── assets/                  # Ikone i slike aplikacije
 ├── src/
 │   ├── config/
-│   │   └── firebase.js      # Firebase konfiguracija ← POPUNI OVO
+│   │   └── firebase.js      # Firebase init — čita iz EXPO_PUBLIC_* env varijabli
 │   ├── navigation/
 │   │   └── AppNavigator.js  # Definicija navigacije
 │   └── screens/
@@ -154,6 +182,7 @@ mar-e/
 │       ├── RegisterScreen.js# Ekran za registraciju
 │       └── HomeScreen.js    # Početni ekran
 ├── App.js                   # Ulazna točka aplikacije
+├── .env.example             # Šablon env varijabli ← kopiraj u .env i popuni
 ├── app.json                 # Expo konfiguracija
 ├── eas.json                 # EAS Build konfiguracija
 ├── babel.config.js          # Babel konfiguracija
@@ -164,9 +193,9 @@ mar-e/
 
 ## 🔒 Sigurnost
 
-- **Nikad ne commituj** `google-services.json`, `GoogleService-Info.plist` ni `.env` fajlove
-- Ovi fajlovi su dodani u `.gitignore`
-- Firebase API ključevi za mobilne aplikacije su po defaultu zaštićeni domenskim restrikcijama
+- **Nikad ne commituj** `.env`, `google-services.json` ni `GoogleService-Info.plist` — svi su u `.gitignore`
+- Firebase API ključevi se čuvaju u `.env` lokalno, a na EAS buildu kao environment varijable u Expo dashboardu
+- `.env.example` (bez stvarnih ključeva) **jeste** commitovan kao šablon za saradnike
 
 ---
 

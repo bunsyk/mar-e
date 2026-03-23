@@ -1,13 +1,11 @@
 // Firebase Configuration
 // -------------------------------------------------------------
-// 1. Idi na https://console.firebase.google.com/
-// 2. Kreiraj novi projekt ili odaberi postojeći
-// 3. Klikni na "Web" ikonu (</>)  da dodas web aplikaciju
-// 4. Kopiraj konfiguraciju i zamijeni vrijednosti ispod
-// 5. Za Android: preuzmi google-services.json i postavi ga
-//    u root direktorij projekta
-// 6. Za iOS: preuzmi GoogleService-Info.plist i postavi ga
-//    u root direktorij projekta
+// Konfiguracija se čita iz .env fajla (nikad ne commituj .env!).
+// Kopiraj .env.example -> .env i popuni stvarne vrijednosti.
+//
+// Za EAS Build (Google Play / App Store) postavi iste
+// varijable u Expo dashboardu:
+// https://expo.dev -> projekt -> Environment variables
 // -------------------------------------------------------------
 
 import { initializeApp } from 'firebase/app';
@@ -16,14 +14,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Zamijeni ove vrijednosti sa stvarnim Firebase konfiguracijom
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Inicijalizacija Firebase
