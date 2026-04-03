@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.mare",
+      "bundleIdentifier": "com.bunsyk.mare",
       "buildNumber": "1"
     },
     "android": {
