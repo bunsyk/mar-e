@@ -12,6 +12,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Vibration,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,7 +46,7 @@ export default function HomeScreen({ navigation }) {
   const [playingButtonId, setPlayingButtonId] = useState('');
   const [activePlayer, setActivePlayer] = useState(null);
   const [editingButton, setEditingButton] = useState(null);
-  const [manageMode, setManageMode] = useState(false);
+  const [activeManageButtonId, setActiveManageButtonId] = useState('');
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
@@ -115,6 +116,11 @@ export default function HomeScreen({ navigation }) {
     setDraftAudioUri('');
     setEditingButton(button);
     setComposerVisible(true);
+  };
+
+  const toggleManageForButton = (buttonId) => {
+    Vibration.vibrate(20);
+    setActiveManageButtonId((prev) => (prev === buttonId ? '' : buttonId));
   };
 
   const resetComposer = async (shouldDeleteDraftAssets = true) => {
@@ -316,6 +322,7 @@ export default function HomeScreen({ navigation }) {
       await deleteStoredAsset(targetButton.imageUri);
       await deleteStoredAsset(targetButton.audioUri);
       await persistButtons(buttons.filter((item) => item.id !== buttonId));
+      setActiveManageButtonId((prev) => (prev === buttonId ? '' : prev));
     } catch (error) {
       console.error('Greška pri brisanju gumba:', error);
       Alert.alert('Greška', 'Nije moguće obrisati gumb.');
@@ -384,22 +391,9 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.heroBadge}>
             <Text style={styles.heroBadgeText}>Lokalno na uređaju</Text>
           </View>
-          <Text style={styles.title}>Gumbi sa slikama</Text>
-          <Text style={styles.subtitle}>
-            Trenutno je aktivno dodavanje gumba sa slikom i glasom, uz lokalno
-            spremanje na uređaj.
-          </Text>
           <Text style={styles.email}>{auth.currentUser?.email}</Text>
 
           <View style={styles.heroActions}>
-            <TouchableOpacity
-              style={styles.manageToggleButton}
-              onPress={() => setManageMode((prev) => !prev)}
-            >
-              <Text style={styles.manageToggleButtonText}>
-                {manageMode ? 'Zatvori uređivanje' : 'Uredi gumbe'}
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.primaryButton} onPress={openComposer}>
               <Text style={styles.primaryButtonText}>Dodaj gumb</Text>
             </TouchableOpacity>
@@ -430,14 +424,28 @@ export default function HomeScreen({ navigation }) {
             columnWrapperStyle={styles.gridRow}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.card}
+                style={[
+                  styles.card,
+                  activeManageButtonId === item.id && styles.cardManageActive,
+                ]}
                 activeOpacity={0.9}
-                onPress={() => playButtonAudio(item)}
+                onPress={() => {
+                  if (activeManageButtonId === item.id) {
+                    setActiveManageButtonId('');
+                    return;
+                  }
+                  playButtonAudio(item);
+                }}
+                onLongPress={() => toggleManageForButton(item.id)}
+                delayLongPress={700}
               >
                 <Image source={{ uri: item.imageUri }} style={styles.cardImage} />
                 <Text style={styles.cardTitle} numberOfLines={1}>
                   {item.label}
                 </Text>
+                {activeManageButtonId === item.id ? (
+                  <Text style={styles.cardHintText}>Uredivanje aktivno</Text>
+                ) : null}
                 <View style={styles.cardFooter}>
                   <TouchableOpacity
                     style={[styles.cardActionButton, styles.playActionButton]}
@@ -448,11 +456,14 @@ export default function HomeScreen({ navigation }) {
                       {playingButtonId === item.id ? '■' : '▶'}
                     </Text>
                   </TouchableOpacity>
-                  {manageMode ? (
+                  {activeManageButtonId === item.id ? (
                     <>
                       <TouchableOpacity
                         style={[styles.cardActionButton, styles.editActionButton]}
-                        onPress={() => openEditComposer(item)}
+                        onPress={() => {
+                          setActiveManageButtonId('');
+                          openEditComposer(item);
+                        }}
                         accessibilityLabel="Uredi gumb"
                       >
                         <Text style={styles.cardActionIcon}>✎</Text>
@@ -585,84 +596,59 @@ const styles = StyleSheet.create({
   },
   hero: {
     backgroundColor: '#0f172a',
-    borderRadius: 28,
-    padding: 20,
+    borderRadius: 20,
+    padding: 14,
     borderWidth: 1,
     borderColor: 'rgba(148, 163, 184, 0.18)',
-    marginBottom: 18,
+    marginBottom: 12,
   },
   email: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#cbd5e1',
-    marginTop: 10,
+    marginTop: 6,
   },
   heroBadge: {
     alignSelf: 'flex-start',
     backgroundColor: '#1f2937',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 999,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   heroBadgeText: {
     color: '#fdba74',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 0.6,
-  },
-  title: {
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: '800',
-    color: '#f8fafc',
-  },
-  subtitle: {
-    marginTop: 8,
-    color: '#94a3b8',
-    lineHeight: 22,
-    fontSize: 15,
+    letterSpacing: 0.4,
   },
   heroActions: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 18,
-  },
-  manageToggleButton: {
-    backgroundColor: '#1d4ed8',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  manageToggleButtonText: {
-    color: '#dbeafe',
-    fontSize: 13,
-    fontWeight: '700',
+    gap: 8,
+    marginTop: 12,
   },
   primaryButton: {
     flex: 1,
     backgroundColor: '#f97316',
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: 14,
+    paddingVertical: 11,
     alignItems: 'center',
   },
   primaryButtonText: {
     color: '#fff7ed',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   secondaryButton: {
     backgroundColor: '#1e293b',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    borderRadius: 14,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryButtonText: {
     color: '#e2e8f0',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   sectionHeader: {
@@ -711,6 +697,14 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(148, 163, 184, 0.14)',
     marginBottom: 12,
   },
+  cardManageActive: {
+    borderColor: '#60a5fa',
+    shadowColor: '#60a5fa',
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 3,
+  },
   cardImage: {
     width: '100%',
     aspectRatio: 1,
@@ -721,6 +715,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: '#f8fafc',
     fontSize: 16,
+    fontWeight: '700',
+  },
+  cardHintText: {
+    marginTop: 6,
+    color: '#93c5fd',
+    fontSize: 12,
     fontWeight: '700',
   },
   cardFooter: {
